@@ -1,13 +1,10 @@
-﻿@using Newtonsoft.Json
-@using Skoruba.Duende.IdentityServer.Admin.UI.Helpers
+﻿@using Skoruba.Duende.IdentityServer.Admin.UI.Helpers
+@using System.Text.Json
+@using System.Text.Json.Serialization
+
 @if (ViewBag.Notifications != null)
 {
-	var settings = new JsonSerializerSettings
-	{
-		TypeNameHandling = TypeNameHandling.All
-	};
-
-	var obj = JsonConvert.DeserializeObject<List<NotificationHelpers.Alert>>(ViewBag.Notifications, settings);
+    var obj = JsonSerializer.Deserialize<List<NotificationHelpers.Alert>>(ViewBag.Notifications);
 
 	foreach (NotificationHelpers.Alert notification in obj)
 	{

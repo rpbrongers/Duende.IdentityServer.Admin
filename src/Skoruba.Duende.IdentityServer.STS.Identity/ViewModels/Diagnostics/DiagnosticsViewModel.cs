@@ -6,9 +6,9 @@
 
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
-using Newtonsoft.Json;
 
 namespace Skoruba.Duende.IdentityServer.STS.Identity.ViewModels.Diagnostics
 {
@@ -24,7 +24,7 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.ViewModels.Diagnostics
                 var bytes = Base64Url.Decode(encoded);
                 var value = Encoding.UTF8.GetString(bytes);
 
-                Clients = JsonConvert.DeserializeObject<string[]>(value);
+                Clients = JsonSerializer.Deserialize<string[]>(value);
             }
         }
 

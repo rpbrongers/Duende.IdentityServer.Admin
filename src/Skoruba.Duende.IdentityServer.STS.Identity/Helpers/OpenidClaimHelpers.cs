@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using IdentityModel;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using IdentityModel.Client;
 using Skoruba.Duende.IdentityServer.STS.Identity.Configuration.Constants;
 
 namespace Skoruba.Duende.IdentityServer.STS.Identity.Helpers
@@ -16,34 +18,45 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Helpers
     {
         public static Claim ExtractAddressClaim(OpenIdProfile profile)
         {
-            var addressJson = new JObject();
+            var hasData = false;
+            using var stream = new MemoryStream();
+            using var w = new Utf8JsonWriter(stream);
+            w.WriteStartObject();
             if (!string.IsNullOrWhiteSpace(profile.StreetAddress))
             {
-                 addressJson[AddressClaimConstants.StreetAddress] = profile.StreetAddress;
+                hasData = true;
+                w.WriteString(AddressClaimConstants.StreetAddress, profile.StreetAddress);
             }
 
             if (!string.IsNullOrWhiteSpace(profile.Locality))
             {
-                 addressJson[AddressClaimConstants.Locality] = profile.Locality;
+                hasData = true;
+                w.WriteString(AddressClaimConstants.Locality, profile.Locality);
             }
 
             if (!string.IsNullOrWhiteSpace(profile.Region))
             {
-                 addressJson[AddressClaimConstants.Region] = profile.Region;
+                hasData = true;
+                w.WriteString(AddressClaimConstants.Region, profile.Region);
             }
 
             if (!string.IsNullOrWhiteSpace(profile.PostalCode))
             {
-                 addressJson[AddressClaimConstants.PostalCode] = profile.PostalCode;
+                hasData = true;
+                w.WriteString(AddressClaimConstants.PostalCode, profile.PostalCode);
             }
 
             if (!string.IsNullOrWhiteSpace(profile.Country))
             {
-                 addressJson[AddressClaimConstants.Country] = profile.Country;
+                hasData = true;
+                w.WriteString(AddressClaimConstants.Country, profile.Country);
             }
+            w.WriteEndObject();
+            w.Flush();
 
+            var addressJson = Encoding.UTF8.GetString(stream.ToArray());
 
-            return new Claim(JwtClaimTypes.Address, addressJson.Count != 0 ? addressJson.ToString() : string.Empty);
+            return new Claim(JwtClaimTypes.Address, hasData ? addressJson : string.Empty);
         }
 
         /// <summary>
@@ -66,33 +79,16 @@ namespace Skoruba.Duende.IdentityServer.STS.Identity.Helpers
 
             try
             {
-                var addressJson = JObject.Parse(address);
-                if (addressJson.ContainsKey(AddressClaimConstants.StreetAddress))
-                {
-                    profile.StreetAddress = addressJson[AddressClaimConstants.StreetAddress].ToString();
-                }
-
-                if (addressJson.ContainsKey(AddressClaimConstants.Locality))
-                {
-                    profile.Locality = addressJson[AddressClaimConstants.Locality].ToString();
-                }
-
-                if (addressJson.ContainsKey(AddressClaimConstants.Region))
-                {
-                    profile.Region = addressJson[AddressClaimConstants.Region].ToString();
-                }
-
-                if (addressJson.ContainsKey(AddressClaimConstants.PostalCode))
-                {
-                    profile.PostalCode = addressJson[AddressClaimConstants.PostalCode].ToString();
-                }
-
-                if (addressJson.ContainsKey(AddressClaimConstants.Country))
-                {
-                    profile.Country = addressJson[AddressClaimConstants.Country].ToString();
-                }
+                using var doc = JsonDocument.Parse(address);
+                var addressJson = doc.RootElement;
+                profile.StreetAddress = addressJson.TryGetString(AddressClaimConstants.StreetAddress);
+                profile.Locality = addressJson.TryGetString(AddressClaimConstants.Locality);
+                profile.Region = addressJson.TryGetString(AddressClaimConstants.Region);
+                profile.PostalCode = addressJson.TryGetString(AddressClaimConstants.PostalCode);
+                profile.Country = addressJson.TryGetString(AddressClaimConstants.Country);
+                
             }
-            catch (JsonReaderException)
+            catch (Exception)
             {
 
             }

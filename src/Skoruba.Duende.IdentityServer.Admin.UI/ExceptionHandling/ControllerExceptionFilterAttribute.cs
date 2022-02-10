@@ -3,12 +3,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Newtonsoft.Json;
 using Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Shared.ExceptionHandling;
 using Skoruba.Duende.IdentityServer.Admin.UI.Helpers;
 
@@ -112,18 +112,13 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.ExceptionHandling
 
             if (tempData.ContainsKey(NotificationHelpers.NotificationKey))
             {
-                alerts = JsonConvert.DeserializeObject<List<NotificationHelpers.Alert>>(tempData[NotificationHelpers.NotificationKey].ToString());
+                alerts = JsonSerializer.Deserialize<List<NotificationHelpers.Alert>>(tempData[NotificationHelpers.NotificationKey].ToString());
                 tempData.Remove(NotificationHelpers.NotificationKey);
             }
 
             alerts.Add(toast);
 
-            var settings = new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.All
-            };
-
-            var alertJson = JsonConvert.SerializeObject(alerts, settings);
+            var alertJson = JsonSerializer.Serialize(alerts);
 
             tempData.Add(NotificationHelpers.NotificationKey, alertJson);
         }

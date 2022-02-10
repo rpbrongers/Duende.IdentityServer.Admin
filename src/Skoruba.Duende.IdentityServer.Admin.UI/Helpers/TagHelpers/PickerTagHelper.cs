@@ -3,10 +3,10 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using Newtonsoft.Json;
 
 namespace Skoruba.Duende.IdentityServer.Admin.UI.Helpers.TagHelpers
 {
@@ -93,7 +93,8 @@ namespace Skoruba.Duende.IdentityServer.Admin.UI.Helpers.TagHelpers
                 }
             };
 
-            var rawPickerHtml = new HtmlString($"<div data-bind='component: {JsonConvert.SerializeObject(component, new JsonSerializerSettings() { StringEscapeHandling = StringEscapeHandling.EscapeHtml })}'></div>");
+            //https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-migrate-from-newtonsoft-how-to?pivots=dotnet-6-0#minimal-character-escaping
+            var rawPickerHtml = new HtmlString($"<div data-bind='component: {JsonSerializer.Serialize(component)}'></div>");
 
             output.Content.AppendHtml(rawPickerHtml);
         }

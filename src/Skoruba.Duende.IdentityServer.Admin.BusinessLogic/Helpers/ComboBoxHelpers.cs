@@ -1,8 +1,9 @@
 ﻿// Copyright (c) Jan Škoruba. All Rights Reserved.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Helpers
 {
@@ -12,18 +13,19 @@ namespace Skoruba.Duende.IdentityServer.Admin.BusinessLogic.Helpers
 		{
 			if (string.IsNullOrEmpty(jsonValues)) return;
 
-			var listValues = JsonConvert.DeserializeObject<List<string>>(jsonValues);
+            var listValues = JsonSerializer.Deserialize<List<string>>(jsonValues);
 			if (listValues == null) return;
 
 			list.AddRange(listValues);
 		}
 
+		[Obsolete("Do not call - useful implementation is missing", true)]
 	    public static void PopulateValue(string jsonValue)
 	    {
 	        if (string.IsNullOrEmpty(jsonValue)) return;
 
-	        var selectedValue = JsonConvert.DeserializeObject<string>(jsonValue);
-	        if (selectedValue == null) return;
+			var selectedValue = JsonSerializer.Deserialize<string>(jsonValue);
+			if (selectedValue == null) return;
 
 	        jsonValue = selectedValue;
 	    }

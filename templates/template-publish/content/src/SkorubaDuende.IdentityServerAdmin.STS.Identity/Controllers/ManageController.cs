@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,6 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SkorubaDuende.IdentityServerAdmin.STS.Identity.Helpers;
 using SkorubaDuende.IdentityServerAdmin.STS.Identity.Helpers.Localization;
 using SkorubaDuende.IdentityServerAdmin.STS.Identity.ViewModels.Manage;
@@ -255,7 +255,7 @@ namespace SkorubaDuende.IdentityServerAdmin.STS.Identity.Controllers
             var personalData = personalDataProps.ToDictionary(p => p.Name, p => p.GetValue(user)?.ToString() ?? "null");
 
             Response.Headers.Add("Content-Disposition", "attachment; filename=PersonalData.json");
-            return new FileContentResult(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(personalData)), "text/json");
+            return new FileContentResult(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(personalData)), "text/json");
         }
 
         [HttpGet]
